@@ -420,7 +420,7 @@ function openModal(it) {
   const day = DAYS.find(d => d.items.some(i => i.id === it.id));
   const dateStr = day ? day.date : "";
   const dateObj = dateStr ? new Date(dateStr + "T12:00:00") : null;
-  const dowNames = ["DOM","SEG","TER","QUA","QUI","SEX","SÁB"];
+  const dowNames = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
   const monthNames = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
 
   if (it.time) {
