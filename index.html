@@ -351,14 +351,17 @@ let _dirty = false;
 
 async function loadChecks() {
   try {
-    // Leitura via raw (público, sem CORS)
-    const url = `https://raw.githubusercontent.com/${REPO}/main/${CHECKS_FILE}?t=${Date.now()}`;
-    const r = await fetch(url);
+    // Lê via API para obter SHA (necessário para o PUT funcionar)
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${CHECKS_FILE}`, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json" }
+    });
     if (r.ok) {
-      const text = await r.text();
-      _checks = JSON.parse(text);
+      const d = await r.json();
+      _checksSha = d.sha;
+      _checks = JSON.parse(atob(d.content.replace(/\n/g,"")));
     } else {
       _checks = {};
+      _checksSha = null;
     }
   } catch(e) {
     try { _checks = JSON.parse(localStorage.getItem("agenda_checks")||"{}"); } catch(e2){ _checks = {}; }
