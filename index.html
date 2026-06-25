@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>SEMANA — 22 a 30/06/2026</title>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/agenda/sw.js').then(reg=>{reg.update();});
+}
+</script>
 <style>
 :root{--bg:#0f1115;--card:#1a1d24;--card2:#21252e;--txt:#eef0f4;--muted:#8a90a0;--accent:#5b8cff;--done:#2ecc71;--warn:#ff5b5b;--gold:#ffc24b;--purple:#b57cff;--teal:#3de6c8;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -31,12 +34,9 @@ header .sub{color:var(--muted);font-size:.88rem;margin-top:4px;}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--done));width:0%;transition:width .35s ease;}
 .progress-text{font-size:.88rem;color:var(--muted);display:flex;justify-content:space-between;}
 .section-title{font-size:.82rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:20px 4px 8px;}
-.item{background:var(--card);border-radius:12px;padding:13px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;border-left:4px solid var(--accent);transition:transform .15s ease,opacity .25s ease;position:relative;overflow:hidden;}
-.item.has-link{cursor:pointer;}
-.item.has-link:hover{background:#1e2230;transform:scale(1.01);}
-.item.has-link:active{transform:scale(.985);}
-.link-icon{position:absolute;top:10px;right:10px;opacity:0;transition:opacity .15s;font-size:.75rem;color:var(--muted);}
-.item.has-link:hover .link-icon{opacity:1;}
+.item{background:var(--card);border-radius:12px;padding:13px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;border-left:4px solid var(--accent);transition:transform .15s ease,opacity .25s ease;position:relative;overflow:hidden;cursor:pointer;}
+.item:hover{background:#1e2230;}
+.item:active{transform:scale(.985);}
 .item.warn{border-left-color:var(--warn);}
 .item.money{border-left-color:var(--gold);}
 .item.purple{border-left-color:var(--purple);}
@@ -72,56 +72,20 @@ header .sub{color:var(--muted);font-size:.88rem;margin-top:4px;}
 .reset-btn{display:block;width:100%;margin-top:22px;padding:11px;background:var(--card2);border:none;border-radius:12px;color:var(--muted);font-size:.84rem;cursor:pointer;}
 .day-panel{display:none;}
 .day-panel.active{display:block;}
-
-/* ── MODAL ──────────────────────────────────────────────────────────────── */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
-  z-index:100;display:flex;align-items:flex-end;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity .2s ease;
-}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s ease;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
-.modal-box{
-  background:#1a1d24;border-radius:20px 20px 0 0;padding:24px 20px 36px;
-  width:100%;max-width:640px;transform:translateY(40px);
-  transition:transform .25s ease;border-top:1px solid #2c303a;
-}
+.modal-box{background:#1a1d24;border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:640px;transform:translateY(60px);transition:transform .25s ease;border-top:1px solid #2c303a;position:relative;}
 .modal-overlay.open .modal-box{transform:translateY(0);}
 .modal-handle{width:40px;height:4px;background:#2c303a;border-radius:4px;margin:0 auto 20px;}
 .modal-badge{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
 .modal-time{font-size:.85rem;font-weight:700;letter-spacing:.5px;margin-bottom:6px;display:block;}
-.modal-title{font-size:1.15rem;font-weight:700;line-height:1.35;margin-bottom:8px;}
-.modal-desc{font-size:.9rem;color:#8a90a0;line-height:1.5;margin-bottom:20px;}
-.modal-btn{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  width:100%;padding:14px;border:none;border-radius:14px;
-  background:#1a2740;color:#5b8cff;font-size:.95rem;font-weight:600;
-  cursor:pointer;text-decoration:none;transition:background .15s;
-}
+.modal-title{font-size:1.1rem;font-weight:700;line-height:1.35;margin-bottom:8px;}
+.modal-desc{font-size:.9rem;color:#8a90a0;line-height:1.5;margin-bottom:20px;min-height:20px;}
+.modal-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:none;border-radius:14px;background:#1a2740;color:#5b8cff;font-size:.95rem;font-weight:600;cursor:pointer;text-decoration:none;transition:background .15s;}
 .modal-btn:hover{background:#1e2e50;}
-.modal-close{
-  position:absolute;top:16px;right:16px;width:32px;height:32px;
-  background:#21252e;border:none;border-radius:50%;color:#8a90a0;
-  font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
-}
-.modal-box{position:relative;}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;background:#21252e;border:none;border-radius:50%;color:#8a90a0;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 </style>
-
-<script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/agenda/sw.js').then(reg => {
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      newWorker.addEventListener('statechange', () => {
-        if(newWorker.state === 'activated'){
-          window.location.reload(true);
-        }
-      });
-    });
-    // Força check de atualização toda vez que abre
-    reg.update();
-  });
-}
-</script>
 </head>
 <body>
 <header>
@@ -130,7 +94,31 @@ if('serviceWorker' in navigator){
 </header>
 <div class="tabs" id="tabs"></div>
 <div id="panelsRoot"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <button class="modal-close" id="modalClose">✕</button>
+    <span class="modal-badge" id="modalBadge"></span>
+    <span class="modal-time" id="modalTime"></span>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <a class="modal-btn" id="modalBtn" href="#" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Ver no Google Agenda
+    </a>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:32px;padding-bottom:28px;">
+  <button onclick="hardReload()" style="background:none;border:none;color:#2a2f3a;font-size:.72rem;cursor:pointer;">v2026.06.25c · atualizar app</button>
+</div>
+
 <script>
+// ════════════════════════════════════════════════════════════
+// 1. DADOS
+// ════════════════════════════════════════════════════════════
 const DAYS=[
   {key:"d22",date:"2026-06-22",dow:"SEG",dnum:"22",
    banner:"💰 DAS MEI Cleonice R$82,05 · Custas Cartório R$5.000 · Pavimentação Financeira Anzac 08h30",
@@ -285,6 +273,9 @@ const DAYS=[
   ]},
 ];
 
+// ════════════════════════════════════════════════════════════
+// 2. SYNC STORAGE (GitHub backend)
+// ════════════════════════════════════════════════════════════
 // ── SYNC STORAGE (GitHub como backend) ──────────────────────────────────────
 const GITHUB_TOKEN = ["ghp_HzX6h6U7","vppPImq8AW3P","EWgeBNm3kc31pIzI"].join("");
 const REPO = "hersonvalmont/agenda";
@@ -347,164 +338,186 @@ function setChecked(date,id,v){
   else delete _checks[ckey(date,id)];
   saveChecks();
 }
-const doneListOpenState={};
-function checkSVG(){return`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;}
 
-function buildItem(it,date){
-  const done=isChecked(date,it.id);
-  const el=document.createElement("div");
-  el.className="item"+(it.cls?" "+it.cls:"")+(it.url?" has-link":"");
-  el.dataset.id=it.id;el.dataset.date=date;
-  el.innerHTML=`<div class="checkbox ${done?"checked":""}" data-id="${it.id}">${checkSVG()}</div><div class="item-body">${it.time?`<span class="item-time">${it.time}</span>`:""}<div class="item-title">${it.title}</div>${it.desc?`<div class="item-desc">${it.desc}</div>`:""}<span class="badge ${it.badge}">${it.bl}</span></div>${it.url?`<span class="link-icon">↗ Agenda</span>`:""}`;
-  el.addEventListener("click",e=>{if(e.target.closest(".checkbox"))return;openModal(it);});
-  return{el,done};
-}
-
-function renderDay(day){
-  const timed=day.items.filter(i=>i.time);
-  const allday=day.items.filter(i=>!i.time);
-  const panel=document.getElementById("panel_"+day.key);
-  const timedList=panel.querySelector(".timedList");
-  const alldayList=panel.querySelector(".allDayList");
-  const doneList=panel.querySelector(".doneList");
-  timedList.innerHTML="";alldayList.innerHTML="";doneList.innerHTML="";
-  let doneCount=0;
-  function place(it,target){const{el,done}=buildItem(it,day.date);if(done){doneCount++;doneList.appendChild(el);}else{target.appendChild(el);}}
-  timed.forEach(it=>place(it,timedList));
-  allday.forEach(it=>place(it,alldayList));
-  const total=day.items.length;
-  const pct=total?Math.round((doneCount/total)*100):0;
-  panel.querySelector(".progFill").style.width=pct+"%";
-  panel.querySelector(".progLabel").textContent=`${doneCount} de ${total} concluídos`;
-  panel.querySelector(".progPct").textContent=pct+"%";
-  panel.querySelector(".emptyMsg").style.display=(total>0&&doneCount===total)?"block":"none";
-  const isOpen=!!doneListOpenState[day.key];
-  doneList.style.display=isOpen?"block":"none";
-  panel.querySelector(".doneToggle").textContent=isOpen?"Ocultar concluídos ▴":"Mostrar concluídos ▾";
-  const tab=document.querySelector(`.tab[data-key="${day.key}"] .dcount`);
-  if(tab)tab.textContent=`${doneCount}/${total}`;
-  panel.querySelectorAll(".checkbox").forEach(cb=>{
-    cb.addEventListener("click",e=>{
-      e.stopPropagation();
-      const id=cb.dataset.id;const itemEl=cb.closest(".item");const inDone=doneList.contains(itemEl);
-      if(inDone){setChecked(day.date,id,false);}else{itemEl.classList.add("fade-out");setChecked(day.date,id,true);}
-      setTimeout(()=>renderDay(day),270);
-    });
-  });
-  panel.querySelector(".doneToggle").onclick=()=>{
-    doneListOpenState[day.key]=!doneListOpenState[day.key];
-    doneList.style.display=doneListOpenState[day.key]?"block":"none";
-    panel.querySelector(".doneToggle").textContent=doneListOpenState[day.key]?"Ocultar concluídos ▴":"Mostrar concluídos ▾";
-  };
-  panel.querySelector(".resetBtn").onclick=()=>{
-    if(confirm(`Resetar checks de ${day.dow} ${day.dnum}/06?`)){day.items.forEach(it=>setChecked(day.date,it.id,false));renderDay(day);}
-  };
-}
-
-function detectTodayKey(){
-  const now=new Date();
-  const s=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-  const m=DAYS.find(d=>d.date===s);return m?m.key:DAYS[0].key;
-}
-const TODAY_KEY=detectTodayKey();
-
-function buildTabs(){
-  const tabsEl=document.getElementById("tabs");
-  DAYS.forEach(day=>{
-    const done=day.items.filter(it=>isChecked(day.date,it.id)).length;
-    const tab=document.createElement("div");
-    tab.className="tab"+(day.key===TODAY_KEY?" today":"");
-    tab.dataset.key=day.key;
-    tab.innerHTML=`<div class="dow">${day.dow}</div><div class="dnum">${day.dnum}</div><div class="dcount">${done}/${day.items.length}</div>`;
-    tab.onclick=()=>switchDay(day.key);
-    tabsEl.appendChild(tab);
-  });
-}
-
-function buildPanels(){
-  const root=document.getElementById("panelsRoot");
-  DAYS.forEach(day=>{
-    const panel=document.createElement("div");
-    panel.className="day-panel";panel.id="panel_"+day.key;
-    panel.innerHTML=`${day.banner?`<div class="alert-banner">${day.banner}</div>`:""}<div class="progress-wrap"><div class="progress-text"><span class="progLabel">0/0</span><span class="progPct">0%</span></div><div class="progress-bar"><div class="progress-fill progFill"></div></div></div><div class="section-title">⏰ Com Horário</div><div class="timedList"></div><div class="section-title">📌 Do Dia (sem horário fixo)</div><div class="allDayList"></div><div class="empty-msg emptyMsg">🎉 Dia zerado!</div><div class="done-toggle doneToggle">Mostrar concluídos ▾</div><div class="doneList"></div><button class="reset-btn resetBtn">↺ Resetar checklist do dia</button>`;
-    root.appendChild(panel);
-  });
-}
-
-function switchDay(key){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.key===key));
-  document.querySelectorAll(".day-panel").forEach(p=>p.classList.toggle("active",p.id==="panel_"+key));
-  renderDay(DAYS.find(d=>d.key===key));
-}
-
-// Mostra loading enquanto carrega checks da nuvem
-document.getElementById("panelsRoot").innerHTML = '<div style="text-align:center;color:#8a90a0;padding:60px 20px;font-size:.95rem;">⏳ Sincronizando agenda...</div>';
-loadChecks().then(() => {
-  document.getElementById("panelsRoot").innerHTML = "";
-  
-function clearCacheReload(){
-  if('caches' in window){
-    caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>{
-      localStorage.removeItem("agenda_checks");
-      window.location.reload(true);
-    });
-  } else {
-    localStorage.removeItem("agenda_checks");
-    window.location.reload(true);
-  }
-}
-
-buildTabs();buildPanels();DAYS.forEach(renderDay);switchDay(TODAY_KEY);
-
-// ── MODAL ────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════
+// 3. MODAL
+// ════════════════════════════════════════════════════════════
 const modalOverlay = document.getElementById("modalOverlay");
 const modalClose   = document.getElementById("modalClose");
 
 function openModal(it) {
-  document.getElementById("modalBadge").textContent  = it.bl || "";
-  document.getElementById("modalBadge").className    = "modal-badge " + (it.badge||"");
-  document.getElementById("modalTime").textContent   = it.time ? "🕐 " + it.time : "📌 Dia todo";
-  document.getElementById("modalTitle").textContent  = it.title;
-  document.getElementById("modalDesc").textContent   = it.desc || "Sem descrição adicional.";
+  document.getElementById("modalBadge").textContent = it.bl || "";
+  document.getElementById("modalBadge").className   = "modal-badge " + (it.badge || "");
+  document.getElementById("modalTime").textContent  = it.time ? "🕐 " + it.time : "📌 Dia todo";
+  document.getElementById("modalTitle").textContent = it.title;
+  document.getElementById("modalDesc").textContent  = it.desc || "";
   const btn = document.getElementById("modalBtn");
-  if (it.url) { btn.href = it.url; btn.style.display = "flex"; }
-  else { btn.style.display = "none"; }
+  btn.href = it.url || "#";
+  btn.style.display = it.url ? "flex" : "none";
   modalOverlay.classList.add("open");
 }
 
 modalClose.onclick = () => modalOverlay.classList.remove("open");
-modalOverlay.addEventListener("click", e => {
-  if (e.target === modalOverlay) modalOverlay.classList.remove("open");
-});
-// swipe down para fechar
+modalOverlay.addEventListener("click", e => { if(e.target === modalOverlay) modalOverlay.classList.remove("open"); });
 let _ty0 = 0;
 modalOverlay.addEventListener("touchstart", e => { _ty0 = e.touches[0].clientY; }, {passive:true});
-modalOverlay.addEventListener("touchend",   e => { if (e.changedTouches[0].clientY - _ty0 > 60) modalOverlay.classList.remove("open"); }, {passive:true});
+modalOverlay.addEventListener("touchend",   e => { if(e.changedTouches[0].clientY - _ty0 > 60) modalOverlay.classList.remove("open"); }, {passive:true});
 
+// ════════════════════════════════════════════════════════════
+// 4. HELPERS
+// ════════════════════════════════════════════════════════════
+const doneListOpenState = {};
+
+function checkSVG(){return`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;}
+
+function hardReload(){
+  if("caches" in window){
+    caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>window.location.reload(true));
+  } else { window.location.reload(true); }
+}
+
+// ════════════════════════════════════════════════════════════
+// 5. RENDER
+// ════════════════════════════════════════════════════════════
+function buildItem(it, date) {
+  const done = isChecked(date, it.id);
+  const el = document.createElement("div");
+  el.className = "item" + (it.cls ? " " + it.cls : "");
+  el.innerHTML = `
+    <div class="checkbox ${done ? "checked" : ""}" data-id="${it.id}">${checkSVG()}</div>
+    <div class="item-body">
+      ${it.time ? `<span class="item-time">${it.time}</span>` : ""}
+      <div class="item-title">${it.title}</div>
+      ${it.desc ? `<div class="item-desc">${it.desc}</div>` : ""}
+      <span class="badge ${it.badge}">${it.bl}</span>
+    </div>`;
+
+  // Checkbox: marca/desmarca
+  el.querySelector(".checkbox").addEventListener("click", e => {
+    e.stopPropagation();
+    const inDone = document.getElementById("panel_" + DAYS.find(d=>d.date===date).key).querySelector(".doneList").contains(el);
+    if(inDone){ setChecked(date, it.id, false); }
+    else { el.classList.add("fade-out"); setChecked(date, it.id, true); }
+    setTimeout(() => renderDay(DAYS.find(d => d.date === date)), 270);
+  });
+
+  // Card: abre modal
+  el.addEventListener("click", e => {
+    if(e.target.closest(".checkbox")) return;
+    openModal(it);
+  });
+
+  return { el, done };
+}
+
+function renderDay(day) {
+  const timed  = day.items.filter(i => i.time);
+  const allday = day.items.filter(i => !i.time);
+  const panel     = document.getElementById("panel_" + day.key);
+  const timedList = panel.querySelector(".timedList");
+  const alldayList= panel.querySelector(".allDayList");
+  const doneList  = panel.querySelector(".doneList");
+  timedList.innerHTML = ""; alldayList.innerHTML = ""; doneList.innerHTML = "";
+  let doneCount = 0;
+
+  function place(it, target) {
+    const { el, done } = buildItem(it, day.date);
+    if(done) { doneCount++; doneList.appendChild(el); }
+    else { target.appendChild(el); }
+  }
+  timed.forEach(it => place(it, timedList));
+  allday.forEach(it => place(it, alldayList));
+
+  const total = day.items.length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+  panel.querySelector(".progFill").style.width = pct + "%";
+  panel.querySelector(".progLabel").textContent = `${doneCount} de ${total} concluídos`;
+  panel.querySelector(".progPct").textContent = pct + "%";
+  panel.querySelector(".emptyMsg").style.display = (total > 0 && doneCount === total) ? "block" : "none";
+
+  const isOpen = !!doneListOpenState[day.key];
+  doneList.style.display = isOpen ? "block" : "none";
+  panel.querySelector(".doneToggle").textContent = isOpen ? "Ocultar concluídos ▴" : "Mostrar concluídos ▾";
+
+  const tab = document.querySelector(`.tab[data-key="${day.key}"] .dcount`);
+  if(tab) tab.textContent = `${doneCount}/${total}`;
+
+  panel.querySelector(".doneToggle").onclick = () => {
+    doneListOpenState[day.key] = !doneListOpenState[day.key];
+    doneList.style.display = doneListOpenState[day.key] ? "block" : "none";
+    panel.querySelector(".doneToggle").textContent = doneListOpenState[day.key] ? "Ocultar concluídos ▴" : "Mostrar concluídos ▾";
+  };
+
+  panel.querySelector(".resetBtn").onclick = () => {
+    if(confirm(`Resetar checks de ${day.dow} ${day.dnum}/06?`)) {
+      day.items.forEach(it => setChecked(day.date, it.id, false));
+      renderDay(day);
+    }
+  };
+}
+
+// ════════════════════════════════════════════════════════════
+// 6. INIT
+// ════════════════════════════════════════════════════════════
+function detectTodayKey() {
+  const now = new Date();
+  const s = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  const m = DAYS.find(d => d.date === s);
+  return m ? m.key : DAYS[0].key;
+}
+const TODAY_KEY = detectTodayKey();
+
+function buildTabs() {
+  const tabsEl = document.getElementById("tabs");
+  DAYS.forEach(day => {
+    const done = day.items.filter(it => isChecked(day.date, it.id)).length;
+    const tab = document.createElement("div");
+    tab.className = "tab" + (day.key === TODAY_KEY ? " today" : "");
+    tab.dataset.key = day.key;
+    tab.innerHTML = `<div class="dow">${day.dow}</div><div class="dnum">${day.dnum}</div><div class="dcount">${done}/${day.items.length}</div>`;
+    tab.onclick = () => switchDay(day.key);
+    tabsEl.appendChild(tab);
+  });
+}
+
+function buildPanels() {
+  const root = document.getElementById("panelsRoot");
+  DAYS.forEach(day => {
+    const panel = document.createElement("div");
+    panel.className = "day-panel"; panel.id = "panel_" + day.key;
+    panel.innerHTML = `
+      ${day.banner ? `<div class="alert-banner">${day.banner}</div>` : ""}
+      <div class="progress-wrap">
+        <div class="progress-text"><span class="progLabel">0/0</span><span class="progPct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill progFill"></div></div>
+      </div>
+      <div class="section-title">⏰ Com Horário</div>
+      <div class="timedList"></div>
+      <div class="section-title">📌 Do Dia (sem horário fixo)</div>
+      <div class="allDayList"></div>
+      <div class="empty-msg emptyMsg">🎉 Dia zerado!</div>
+      <div class="done-toggle doneToggle">Mostrar concluídos ▾</div>
+      <div class="doneList"></div>
+      <button class="reset-btn resetBtn">↺ Resetar checklist do dia</button>`;
+    root.appendChild(panel);
+  });
+}
+
+function switchDay(key) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.key === key));
+  document.querySelectorAll(".day-panel").forEach(p => p.classList.toggle("active", p.id === "panel_" + key));
+  renderDay(DAYS.find(d => d.key === key));
+}
+
+// Carrega checks da nuvem antes de renderizar
+document.getElementById("panelsRoot").innerHTML = '<div style="text-align:center;color:#8a90a0;padding:60px 20px;font-size:.95rem;">⏳ Sincronizando...</div>';
+loadChecks().then(() => {
+  document.getElementById("panelsRoot").innerHTML = "";
+  buildTabs();
+  buildPanels();
+  DAYS.forEach(renderDay);
+  switchDay(TODAY_KEY);
 });
 </script>
-
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal-box">
-    <div class="modal-handle"></div>
-    <button class="modal-close" id="modalClose">✕</button>
-    <span class="modal-badge" id="modalBadge"></span>
-    <span class="modal-time" id="modalTime"></span>
-    <div class="modal-title" id="modalTitle"></div>
-    <div class="modal-desc" id="modalDesc"></div>
-    <a class="modal-btn" id="modalBtn" href="#" target="_blank">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Ver no Google Agenda
-    </a>
-  </div>
-</div>
-
-
-<div style="text-align:center;margin-top:32px;padding-bottom:24px;">
-  <button onclick="clearCacheReload()" style="background:none;border:none;color:#3a3f4a;font-size:.75rem;cursor:pointer;text-decoration:underline;">
-    v2026.06.25b · limpar cache
-  </button>
-</div>
-
 </body>
 </html>
