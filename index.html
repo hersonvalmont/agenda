@@ -98,10 +98,16 @@ header .sub{color:var(--muted);font-size:.88rem;margin-top:4px;}
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
-    <div class="modal-handle"></div>
-    <button class="modal-close" id="modalClose">✕</button>
-    <span class="modal-badge" id="modalBadge"></span>
-    <span class="modal-time" id="modalTime"></span>
+    <div class="modal-header">
+      <span class="modal-badge" id="modalBadge"></span>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-time-block">
+      <div class="modal-time-day" id="modalTimeDay"></div>
+      <span class="modal-time" id="modalTime"></span>
+      <span class="modal-date" id="modalDate"></span>
+    </div>
+    <div class="modal-divider"></div>
     <div class="modal-title" id="modalTitle"></div>
     <div class="modal-desc" id="modalDesc"></div>
     <a class="modal-btn" id="modalBtn" href="#" target="_blank">
@@ -342,22 +348,48 @@ const modalOverlay = document.getElementById("modalOverlay");
 const modalClose   = document.getElementById("modalClose");
 
 function openModal(it) {
-  document.getElementById("modalBadge").textContent = it.bl || "";
-  document.getElementById("modalBadge").className   = "modal-badge " + (it.badge || "");
-  document.getElementById("modalTime").textContent  = it.time ? "🕐 " + it.time : "📌 Dia todo";
+  // Badge
+  const badge = document.getElementById("modalBadge");
+  badge.textContent = it.bl || "";
+  badge.className = "modal-badge " + (it.badge || "");
+
+  // Horário grande
+  const timeEl = document.getElementById("modalTime");
+  const dayEl  = document.getElementById("modalTimeDay");
+  const dateEl = document.getElementById("modalDate");
+
+  // Encontrar o dia correspondente para exibir a data
+  const day = DAYS.find(d => d.items.some(i => i.id === it.id));
+  const dateStr = day ? day.date : "";
+  const dateObj = dateStr ? new Date(dateStr + "T12:00:00") : null;
+  const dowNames = ["DOM","SEG","TER","QUA","QUI","SEX","SÁB"];
+  const monthNames = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+  if (it.time) {
+    timeEl.textContent = it.time;
+    timeEl.className = "modal-time";
+    dayEl.textContent = dateObj ? dowNames[dateObj.getDay()] : "";
+    dateEl.textContent = dateObj ? `${dateObj.getDate()} de ${monthNames[dateObj.getMonth()]} de ${dateObj.getFullYear()}` : "";
+  } else {
+    timeEl.textContent = "Dia todo";
+    timeEl.className = "modal-time allday";
+    dayEl.textContent = dateObj ? dowNames[dateObj.getDay()] : "";
+    dateEl.textContent = dateObj ? `${dateObj.getDate()} de ${monthNames[dateObj.getMonth()]} de ${dateObj.getFullYear()}` : "";
+  }
+
   document.getElementById("modalTitle").textContent = it.title;
   document.getElementById("modalDesc").textContent  = it.desc || "";
+
   const btn = document.getElementById("modalBtn");
   btn.href = it.url || "#";
   btn.style.display = it.url ? "flex" : "none";
+
   modalOverlay.classList.add("open");
 }
 
 modalClose.onclick = () => modalOverlay.classList.remove("open");
 modalOverlay.addEventListener("click", e => { if(e.target === modalOverlay) modalOverlay.classList.remove("open"); });
-let _ty0 = 0;
-modalOverlay.addEventListener("touchstart", e => { _ty0 = e.touches[0].clientY; }, {passive:true});
-modalOverlay.addEventListener("touchend",   e => { if(e.changedTouches[0].clientY - _ty0 > 60) modalOverlay.classList.remove("open"); }, {passive:true});
+
 
 // ════════════════════════════════════════════════════════════
 // 4. HELPERS
