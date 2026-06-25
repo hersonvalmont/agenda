@@ -287,22 +287,18 @@ let _dirty = false;
 
 async function loadChecks() {
   try {
-    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${CHECKS_FILE}`, {
-      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json" }
-    });
+    // Leitura via raw (público, sem CORS)
+    const url = `https://raw.githubusercontent.com/${REPO}/main/${CHECKS_FILE}?t=${Date.now()}`;
+    const r = await fetch(url);
     if (r.ok) {
-      const d = await r.json();
-      _checksSha = d.sha;
-      _checks = JSON.parse(atob(d.content.replace(/\n/g,"")));
-    } else if (r.status === 404) {
+      const text = await r.text();
+      _checks = JSON.parse(text);
+    } else {
       _checks = {};
-      _checksSha = null;
     }
   } catch(e) {
-    // offline — usa localStorage como fallback
-    try { _checks = JSON.parse(localStorage.getItem("agenda_checks")||"{}"); } catch(e2){}
+    try { _checks = JSON.parse(localStorage.getItem("agenda_checks")||"{}"); } catch(e2){ _checks = {}; }
   }
-  // sync localStorage também
   try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e){}
 }
 
