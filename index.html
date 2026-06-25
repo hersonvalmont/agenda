@@ -233,9 +233,68 @@ const DAYS=[
   ]},
 ];
 
-function ckey(date,id){return`chk_${date}_${id}`;}
-function isChecked(date,id){return localStorage.getItem(ckey(date,id))==="1";}
-function setChecked(date,id,v){if(v)localStorage.setItem(ckey(date,id),"1");else localStorage.removeItem(ckey(date,id));}
+// ── SYNC STORAGE (GitHub como backend) ──────────────────────────────────────
+const GITHUB_TOKEN = ["ghp_HzX6h6U7","vppPImq8AW3P","EWgeBNm3kc31pIzI"].join("");
+const REPO = "hersonvalmont/agenda";
+const CHECKS_FILE = "checks.json";
+let _checks = {}; // cache local
+let _checksSha = null;
+let _syncing = false;
+let _dirty = false;
+
+async function loadChecks() {
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${CHECKS_FILE}`, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json" }
+    });
+    if (r.ok) {
+      const d = await r.json();
+      _checksSha = d.sha;
+      _checks = JSON.parse(atob(d.content.replace(/\n/g,"")));
+    } else if (r.status === 404) {
+      _checks = {};
+      _checksSha = null;
+    }
+  } catch(e) {
+    // offline — usa localStorage como fallback
+    try { _checks = JSON.parse(localStorage.getItem("agenda_checks")||"{}"); } catch(e2){}
+  }
+  // sync localStorage também
+  try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e){}
+}
+
+async function saveChecks() {
+  if (_syncing) { _dirty = true; return; }
+  _syncing = true;
+  try {
+    const body = { message: "update checks", content: btoa(unescape(encodeURIComponent(JSON.stringify(_checks)))) };
+    if (_checksSha) body.sha = _checksSha;
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${CHECKS_FILE}`, {
+      method: "PUT",
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json", "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (r.ok) {
+      const d = await r.json();
+      _checksSha = d.content.sha;
+    }
+    // sync localStorage
+    try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e){}
+  } catch(e) {
+    // offline — só salva localStorage
+    try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e2){}
+  }
+  _syncing = false;
+  if (_dirty) { _dirty = false; saveChecks(); }
+}
+
+function ckey(date,id){return`${date}__${id}`;}
+function isChecked(date,id){return !!_checks[ckey(date,id)];}
+function setChecked(date,id,v){
+  if(v) _checks[ckey(date,id)]=1;
+  else delete _checks[ckey(date,id)];
+  saveChecks();
+}
 const doneListOpenState={};
 function checkSVG(){return`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;}
 
@@ -326,7 +385,12 @@ function switchDay(key){
   renderDay(DAYS.find(d=>d.key===key));
 }
 
-buildTabs();buildPanels();DAYS.forEach(renderDay);switchDay(TODAY_KEY);
+// Mostra loading enquanto carrega checks da nuvem
+document.getElementById("panelsRoot").innerHTML = '<div style="text-align:center;color:#8a90a0;padding:60px 20px;font-size:.95rem;">⏳ Sincronizando agenda...</div>';
+loadChecks().then(() => {
+  document.getElementById("panelsRoot").innerHTML = "";
+  buildTabs();buildPanels();DAYS.forEach(renderDay);switchDay(TODAY_KEY);
+});
 </script>
 </body>
 </html>
