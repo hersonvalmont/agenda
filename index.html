@@ -105,6 +105,23 @@ header .sub{color:var(--muted);font-size:.88rem;margin-top:4px;}
 }
 .modal-box{position:relative;}
 </style>
+
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/agenda/sw.js').then(reg => {
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if(newWorker.state === 'activated'){
+          window.location.reload(true);
+        }
+      });
+    });
+    // Força check de atualização toda vez que abre
+    reg.update();
+  });
+}
+</script>
 </head>
 <body>
 <header>
@@ -485,7 +502,7 @@ modalOverlay.addEventListener("touchend",   e => { if (e.changedTouches[0].clien
 
 <div style="text-align:center;margin-top:32px;padding-bottom:24px;">
   <button onclick="clearCacheReload()" style="background:none;border:none;color:#3a3f4a;font-size:.75rem;cursor:pointer;text-decoration:underline;">
-    v2026.06.25 · limpar cache
+    v2026.06.25b · limpar cache
   </button>
 </div>
 
