@@ -73,18 +73,78 @@ header .sub{color:var(--muted);font-size:.88rem;margin-top:4px;}
 .day-panel{display:none;}
 .day-panel.active{display:block;}
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+.modal-overlay{
+  position:fixed;inset:0;
+  background:#0f1115;
+  z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s ease;
+}
 .modal-overlay.open{opacity:1;pointer-events:all;}
-.modal-box{background:#1a1d24;border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:640px;transform:translateY(60px);transition:transform .25s ease;border-top:1px solid #2c303a;position:relative;}
-.modal-overlay.open .modal-box{transform:translateY(0);}
-.modal-handle{width:40px;height:4px;background:#2c303a;border-radius:4px;margin:0 auto 20px;}
-.modal-badge{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
-.modal-time{font-size:.85rem;font-weight:700;letter-spacing:.5px;margin-bottom:6px;display:block;}
-.modal-title{font-size:1.1rem;font-weight:700;line-height:1.35;margin-bottom:8px;}
-.modal-desc{font-size:.9rem;color:#8a90a0;line-height:1.5;margin-bottom:20px;min-height:20px;}
-.modal-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:none;border-radius:14px;background:#1a2740;color:#5b8cff;font-size:.95rem;font-weight:600;cursor:pointer;text-decoration:none;transition:background .15s;}
+.modal-box{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:40px 32px 48px;
+  position:relative;
+  transform:scale(.96);
+  transition:transform .22s ease;
+}
+.modal-overlay.open .modal-box{transform:scale(1);}
+.modal-close{
+  position:absolute;top:52px;right:28px;
+  width:38px;height:38px;
+  background:#21252e;border:none;border-radius:50%;
+  color:#8a90a0;font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.modal-badge{
+  display:inline-block;font-size:.75rem;font-weight:700;
+  padding:4px 12px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.8px;
+  margin-bottom:36px;align-self:flex-start;
+}
+.modal-time-block{margin-bottom:28px;}
+.modal-time-day{
+  font-size:.9rem;color:var(--muted);
+  letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:8px;display:block;
+}
+.modal-time{
+  font-size:5.5rem;font-weight:900;
+  color:#ffc24b;line-height:1;
+  letter-spacing:-2px;display:block;
+}
+.modal-time.allday{
+  font-size:2.2rem;color:var(--muted);
+  letter-spacing:0;font-weight:700;
+}
+.modal-date{
+  font-size:1rem;color:var(--muted);
+  margin-top:10px;display:block;
+}
+.modal-divider{
+  height:1px;background:#2c303a;
+  margin:0 0 28px;
+}
+.modal-title{
+  font-size:1.5rem;font-weight:800;
+  line-height:1.3;margin-bottom:12px;
+}
+.modal-desc{
+  font-size:.95rem;color:#8a90a0;
+  line-height:1.6;margin-bottom:40px;
+  flex:1;
+}
+.modal-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:18px;border:none;border-radius:16px;
+  background:#1a2740;color:#5b8cff;
+  font-size:1rem;font-weight:700;
+  cursor:pointer;text-decoration:none;
+  transition:background .15s;
+}
 .modal-btn:hover{background:#1e2e50;}
-.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;background:#21252e;border:none;border-radius:50%;color:#8a90a0;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 </style>
 </head>
 <body>
@@ -98,12 +158,10 @@ header .sub{color:var(--muted);font-size:.88rem;margin-top:4px;}
 <!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
-    <div class="modal-header">
-      <span class="modal-badge" id="modalBadge"></span>
-      <button class="modal-close" id="modalClose">✕</button>
-    </div>
+    <button class="modal-close" id="modalClose">✕</button>
+    <span class="modal-badge" id="modalBadge"></span>
     <div class="modal-time-block">
-      <div class="modal-time-day" id="modalTimeDay"></div>
+      <span class="modal-time-day" id="modalTimeDay"></span>
       <span class="modal-time" id="modalTime"></span>
       <span class="modal-date" id="modalDate"></span>
     </div>
@@ -111,7 +169,7 @@ header .sub{color:var(--muted);font-size:.88rem;margin-top:4px;}
     <div class="modal-title" id="modalTitle"></div>
     <div class="modal-desc" id="modalDesc"></div>
     <a class="modal-btn" id="modalBtn" href="#" target="_blank">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Ver no Google Agenda
     </a>
   </div>
