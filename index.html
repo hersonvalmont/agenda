@@ -5,7 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>SEMANA — 29/06 a 05/07/2026 · 1783005857</title>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/agenda/sw.js').then(r=>r.update());}</script>
+<script>
+// Derregistrar SW e limpar todos os caches
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(regs=>{
+    regs.forEach(r=>r.unregister());
+  });
+}
+if('caches' in window){
+  caches.keys().then(keys=>keys.forEach(k=>caches.delete(k)));
+}
+</script>
 <style>
 :root{--bg:#0f1115;--card:#1a1d24;--card2:#21252e;--txt:#eef0f4;--muted:#8a90a0;--accent:#5b8cff;--done:#2ecc71;--warn:#ff5b5b;--gold:#ffc24b;--purple:#b57cff;--teal:#3de6c8;}
 *{box-sizing:border-box;margin:0;padding:0;}
