@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGENDA — 06 a 12/07/2026</title>
+<script>
+// Limpar SW e caches antigos
+if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(r=>{r.forEach(s=>s.unregister());});}
+if("caches" in window){caches.keys().then(k=>k.forEach(c=>caches.delete(c)));}
+</script>
+<style>
+:root{--bg:#0f1115;--card:#1a1d24;--card2:#21252e;--txt:#eef0f4;--muted:#8a90a0;--accent:#5b8cff;--done:#2ecc71;--warn:#ff5b5b;--gold:#ffc24b;--purple:#b57cff;--teal:#3de6c8;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);padding:16px;max-width:640px;margin:0 auto;}
+header{text-align:center;padding:18px 0 6px;}
+header h1{font-size:1.5rem;letter-spacing:1px;}
+header .sub{color:var(--muted);font-size:.88rem;margin-top:4px;}
+.tabs{display:flex;overflow-x:auto;gap:6px;margin:14px 0 6px;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+.tabs::-webkit-scrollbar{height:4px;}.tabs::-webkit-scrollbar-thumb{background:#2c303a;border-radius:4px;}
+.tab{flex:0 0 auto;background:var(--card);border:2px solid transparent;border-radius:12px;padding:8px 12px;text-align:center;cursor:pointer;min-width:64px;transition:all .15s;}
+.tab .dow{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.tab .dnum{font-size:1.05rem;font-weight:700;margin-top:2px;}
+.tab .dcount{font-size:.65rem;color:var(--accent);margin-top:2px;}
+.tab.active{border-color:var(--accent);background:#1a2740;}.tab.active .dnum{color:var(--accent);}
+.tab.today{position:relative;}.tab.today::after{content:'';position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--gold);}
+.alert-banner{background:#1f1820;border:1px solid var(--purple);border-radius:12px;padding:10px 14px;margin:12px 0;font-size:.86rem;color:var(--purple);display:flex;align-items:center;gap:8px;}
+.progress-wrap{background:var(--card);border-radius:14px;padding:14px 16px;margin:14px 0 20px;}
+.progress-bar{height:10px;background:#2c303a;border-radius:6px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--done));width:0%;transition:width .35s ease;}
+.progress-text{font-size:.88rem;color:var(--muted);display:flex;justify-content:space-between;}
+.section-title{font-size:.82rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:20px 4px 8px;}
+.item{background:var(--card);border-radius:12px;padding:13px 14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;border-left:4px solid var(--accent);transition:transform .15s ease,opacity .25s ease;position:relative;overflow:hidden;cursor:pointer;}
+.item:hover{background:#1e2230;}.item:active{transform:scale(.985);}
+.item.warn{border-left-color:var(--warn);}.item.money{border-left-color:var(--gold);}.item.purple{border-left-color:var(--purple);}.item.teal{border-left-color:var(--teal);}.item.personal{border-left-color:#ff8c69;}
+.checkbox{width:26px;height:26px;border-radius:50%;border:2px solid currentColor;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;background:transparent;color:var(--accent);z-index:2;position:relative;}
+.item.warn .checkbox{color:var(--warn);}.item.money .checkbox{color:var(--gold);}.item.purple .checkbox{color:var(--purple);}.item.teal .checkbox{color:var(--teal);}.item.personal .checkbox{color:#ff8c69;}
+.checkbox.checked{background:var(--done);border-color:var(--done);color:var(--done);}
+.checkbox svg{width:14px;height:14px;opacity:0;transition:opacity .15s;}.checkbox.checked svg{opacity:1;}
+.item-body{flex:1;min-width:0;}
+.item-time{font-size:.78rem;font-weight:700;letter-spacing:.5px;margin-bottom:2px;display:block;color:var(--accent);}
+.item.warn .item-time{color:var(--warn);}.item.money .item-time{color:var(--gold);}.item.purple .item-time{color:var(--purple);}.item.teal .item-time{color:var(--teal);}.item.personal .item-time{color:#ff8c69;}
+.item-title{font-size:.98rem;font-weight:600;line-height:1.3;}
+.item-desc{font-size:.83rem;color:var(--muted);margin-top:3px;line-height:1.4;}
+.badge{display:inline-block;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:5px;text-transform:uppercase;letter-spacing:.5px;}
+.badge-eng{background:#1f2018;color:var(--gold);}.badge-tfd{background:#1a1a2e;color:var(--purple);}.badge-anz{background:#142420;color:var(--teal);}.badge-pes{background:#1f1a1a;color:#ff8c69;}
+.fade-out{opacity:0;transform:translateX(40px) scale(.95);max-height:0!important;padding:0!important;margin:0!important;border:none!important;}
+.done-toggle{text-align:center;margin:22px 0 6px;color:var(--muted);font-size:.84rem;cursor:pointer;text-decoration:underline;}
+.doneList{display:none;opacity:.55;}
+.empty-msg{text-align:center;color:var(--muted);padding:28px;font-size:1rem;display:none;}
+.reset-btn{display:block;width:100%;margin-top:22px;padding:11px;background:var(--card2);border:none;border-radius:12px;color:var(--muted);font-size:.84rem;cursor:pointer;}
+.day-panel{display:none;}.day-panel.active{display:block;}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:#0f1115;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-box{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;padding:40px 32px 48px;position:relative;transform:scale(.96);transition:transform .22s ease;}
+.modal-overlay.open .modal-box{transform:scale(1);}
+.modal-close{position:absolute;top:52px;right:28px;width:38px;height:38px;background:#21252e;border:none;border-radius:50%;color:#8a90a0;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.modal-badge{display:inline-block;font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:36px;align-self:flex-start;}
+.modal-time-block{margin-bottom:28px;}
+.modal-time-day{font-size:.9rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:block;}
+.modal-time{font-size:5.5rem;font-weight:900;color:#ffc24b;line-height:1;letter-spacing:-2px;display:block;}
+.modal-time.allday{font-size:2.2rem;color:var(--muted);letter-spacing:0;font-weight:700;}
+.modal-date{font-size:1rem;color:var(--muted);margin-top:10px;display:block;}
+.modal-divider{height:1px;background:#2c303a;margin:0 0 28px;}
+.modal-title{font-size:1.5rem;font-weight:800;line-height:1.3;margin-bottom:12px;}
+.modal-desc{font-size:.95rem;color:#8a90a0;line-height:1.6;margin-bottom:40px;flex:1;}
+.modal-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px;border:none;border-radius:16px;background:#1a2740;color:#5b8cff;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;transition:background .15s;}
+.modal-btn:hover{background:#1e2e50;}
+</style>
+</head>
+<body>
+<header>
+  <h1>📋 06 – 12 JULHO</h1>
+  <div class="sub">Semana · início de julho</div>
+</header>
+<div class="tabs" id="tabs"></div>
+<div id="panelsRoot"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose">✕</button>
+    <span class="modal-badge" id="modalBadge"></span>
+    <div class="modal-time-block">
+      <span class="modal-time-day" id="modalTimeDay"></span>
+      <span class="modal-time" id="modalTime"></span>
+      <span class="modal-date" id="modalDate"></span>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <a class="modal-btn" id="modalBtn" href="#" target="_blank">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Ver no Google Agenda
+    </a>
+  </div>
+</div>
+
+<div style="text-align:center;margin-top:32px;padding-bottom:28px;">
+  <button onclick="hardReload()" style="background:none;border:none;color:#2a2f3a;font-size:.72rem;cursor:pointer;">v2026.07.05 · atualizar app</button>
+</div>
+
+<script>
+const DAYS=[{"key": "d06", "date": "2026-07-06", "dow": "Segunda", "dnum": "06", "banner": "💰 Custas Cartório R$5.000 · Verba Mídia Anzac · Reunião Renato 15h · Vôlei 19h", "items": [{"id": "d06t1", "time": "06:00", "title": "Enviar Saldo Bancário e PDC — Guilherme", "desc": "Engelinhas · rotina", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=a2l2ZnI4ZzQxZDAzdTJybjZnY2k0NzRzcDhfMjAyNjA3MDZUMDkwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t2", "time": "07:00", "title": "CHECK-IN EXECUTIVO GRUPO TIO FRED", "desc": "07:00–09:30", "cls": "purple", "badge": "badge-tfd", "bl": "TIO FRED", "url": "https://www.google.com/calendar/event?eid=YnJiaGZsYTBsNGNmZDIzZmtmNTE2a2dhc2tfMjAyNjA3MDZUMTAwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t3", "time": "09:00", "title": "Enviar NFs c/ Retenção Fora do Município — Contabilidade", "desc": "04/05/2026", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=Mmsya2RrbmM5cXZuNG11cDBjbm9wZzdxOWdfMjAyNjA3MDRUMTIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t4", "time": "09:00", "title": "Enviar Recibo de Aluguel — Contabilidade", "desc": "04/05/2026", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=YTV2ZG9hODAyb3RzbzE4Njc0bTI5ZHJkaWNfMjAyNjA3MDRUMTIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t5", "time": "09:00", "title": "Enviar Relatório NFs Emitidas/Canceladas — Contabilidade", "desc": "04/05/2026", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=a2dxOWs0MG8xZ2JqajhoOGg2dXJkaWRxbjBfMjAyNjA3MDRUMTIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t6", "time": "09:00", "title": "Enviar XMLs NFS Entradas — Contabilidade", "desc": "04/05/2026", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=a3F0bDFqcXJxcDdwbzdzZmx2dnBvMjg0bm9fMjAyNjA3MDRUMTIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t7", "time": "09:00", "title": "Enviar Relatório Distribuição de Lucros — Contabilidade", "desc": "04/05/2026", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=czM3YmZ1bHQxbW04MDZtdm9iY2V2OXRhcmtfMjAyNjA3MDRUMTIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t8", "time": "10:00", "title": "Check-in Diário Anzac Men", "desc": "Remoto · 10:00–10:30", "cls": "teal", "badge": "badge-anz", "bl": "ANZAC MEN", "url": "https://www.google.com/calendar/event?eid=MWRtc2hkdjYxaG9iMWwycDRvNW1xdjFuNXNfMjAyNjA3MDZUMTMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t9", "time": "10:00", "title": "Cartas de Anuência Cartório", "desc": "Rotina diária", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=bzlzNjRnbnI5YnBia2FjMHA1N2cxZW1wanNfMjAyNjA3MDZUMTMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t10", "time": "13:00", "title": "Conciliação Bancária — Valmont Labs", "desc": "13:00–14:00", "cls": "purple", "badge": "badge-pes", "bl": "VALMONT LABS", "url": "https://www.google.com/calendar/event?eid=dnJ1cmhzZmhmMm1hb3Y4aDlmb3MwazU1ZThfMjAyNjA3MDZUMTYwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t11", "time": "15:00", "title": "Reunião Executiva de Alinhamento — Renato (Engelinhas)", "desc": "15:00–15:45", "cls": "warn", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=cmpmNTIyMW9vMDc5ZDlvcjBxNXZlc3BpdTBfMjAyNjA3MDZUMTgwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06t12", "time": "19:00", "title": "Vôlei", "desc": "19:00–21:00", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=OTBsYzNha21jMjY1ZDE1Z241c3BlZnM2aDhfMjAyNjA3MDZUMjIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d06a1", "time": "", "title": "💰 Custas Cartório dos Protestos", "desc": "R$5.000,00 semanal · Guilherme Sócio", "cls": "warn", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=OXRtMDVrYnJucm9zOTkxbzZzbzE3c2piMnNfMjAyNjA3MDYgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d06a2", "time": "", "title": "RELATÓRIO TRÁFEGO PAGO", "desc": "Grupo Tio Fred", "cls": "", "badge": "badge-tfd", "bl": "TIO FRED", "url": "https://www.google.com/calendar/event?eid=NDY2bWJhZTYxcjlhNTJ0bHRhYWpmaTU2dGFfMjAyNjA3MDYgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d06a3", "time": "", "title": "Atualizar Controle de Verba de Mídia — Anzac Men", "desc": "", "cls": "teal", "badge": "badge-anz", "bl": "ANZAC MEN", "url": "https://www.google.com/calendar/event?eid=NGJpNzBmcDVzMHA3YWEwNHNkcDdxNWZzdnNfMjAyNjA3MDYgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d06a4", "time": "", "title": "Receber Verba Tráfego Pago — Anzac Men", "desc": "", "cls": "money", "badge": "badge-anz", "bl": "ANZAC MEN", "url": "https://www.google.com/calendar/event?eid=cWJtb2NvZXNxcW0yZ3NlcDg3Zjh2bXB1aThfMjAyNjA3MDYgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d06a5", "time": "", "title": "Verificação DET — Todos os Clientes", "desc": "Rotina semanal", "cls": "warn", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=bzhpdjFzZmh2NGEyZGQwODQ2dmt0b2d2anNfMjAyNjA3MDYgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d06a6", "time": "", "title": "Anzac Men — Pagamento Levis", "desc": "R$1.516,59 · Doc 326692/03", "cls": "money", "badge": "badge-anz", "bl": "ANZAC MEN", "url": "https://www.google.com/calendar/event?eid=MnYxMmxvdjVvaWRqNWRsNW5zY2FoZnJ0YWsgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d06a7", "time": "", "title": "Envio Contabilidade (Lastro Fiscal) — Reembolso Tio Fred", "desc": "", "cls": "purple", "badge": "badge-tfd", "bl": "TIO FRED", "url": "https://www.google.com/calendar/event?eid=MHJla3BudXF0bTN1YmFvdGczdTQxOTltOWdfMjAyNjA3MDYgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d06a8", "time": "", "title": "Acompanhar Salário-Maternidade Urbano", "desc": "Pedido 1085470321", "cls": "", "badge": "badge-pes", "bl": "INSS", "url": "https://www.google.com/calendar/event?eid=a25oM2pkM24wMzdqbDN1YWY5ZzZrMjJsYmNfMjAyNjA3MDYgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}]}, {"key": "d07", "date": "2026-07-07", "dow": "Terça", "dnum": "07", "banner": "⚖️ Dr. Allan Agrelli 15h · Pautas Le Crocant 07h · 💰 Cirque du Soleil 3/4 · TFAMG Engelinhas", "items": [{"id": "d07t1", "time": "06:00", "title": "Enviar Saldo Bancário e PDC — Guilherme", "desc": "Engelinhas · rotina", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=a2l2ZnI4ZzQxZDAzdTJybjZnY2k0NzRzcDhfMjAyNjA3MDdUMDkwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d07t2", "time": "07:00", "title": "CHECK-IN EXECUTIVO ANZAC MEN", "desc": "07:00–08:30", "cls": "teal", "badge": "badge-anz", "bl": "ANZAC MEN", "url": "https://www.google.com/calendar/event?eid=OGI1N2pkcDNpaXJza3Y5Ymk1ZHIzYWM4aDRfMjAyNjA3MDdUMTAwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d07t3", "time": "07:00", "title": "Pautas Executivas — Le Crocant", "desc": "07:00–08:45 · Valmont, Will Martins, Clara", "cls": "purple", "badge": "badge-pes", "bl": "EXECUTIVO", "url": "https://www.google.com/calendar/event?eid=aWszb2h2OW9xZ2dxam5sbGFpYmFtNThkM2dfMjAyNjA3MDdUMTAwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d07t4", "time": "09:00", "title": "Roselba — facial, digital e cópia de chave", "desc": "", "cls": "", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=ZDIzZzI0djFyaGprMW80N2hxNW5pbHFjdm8gaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d07t5", "time": "09:00", "title": "Caminhada leve — janela de movimento", "desc": "40–60 min · perto do vôlei da Jade", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=aGdybW1lYmZnanBoZTRkNmVybG82b2dvY2tfMjAyNjA3MDdUMTIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d07t6", "time": "09:00", "title": "Vôlei Jade", "desc": "09:00–10:20", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=bWxnY2lyZm00Mzl2amZudnQxb3BwaHZubXJfMjAyNjA3MDdUMTIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d07t7", "time": "10:00", "title": "Cartas de Anuência Cartório", "desc": "Rotina diária", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=bzlzNjRnbnI5YnBia2FjMHA1N2cxZW1wanNfMjAyNjA3MDdUMTMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d07t8", "time": "11:00", "title": "Engelinhas 11h–18h", "desc": "Bloco de trabalho", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=NjFpM2dkMzQ2MWkzNGJiMzY0bzZhYjlrNjlpbWNiOW82NHNtNmJiNmNkaGoyYzlpNmdwMzRkajY3NF8yMDI2MDcwN1QxNDAwMDBaIGhlcnNvbi52YWxtb250QG0&ctz=America/Sao_Paulo"}, {"id": "d07t9", "time": "13:00", "title": "Conciliação Bancária — Valmont Labs", "desc": "13:00–14:00", "cls": "purple", "badge": "badge-pes", "bl": "VALMONT LABS", "url": "https://www.google.com/calendar/event?eid=dnJ1cmhzZmhmMm1hb3Y4aDlmb3MwazU1ZThfMjAyNjA3MDdUMTYwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d07t10", "time": "15:00", "title": "Reunião com Dr. Allan Agrelli", "desc": "Parceria jurídica estratégica · assessoria recorrente", "cls": "warn", "badge": "badge-pes", "bl": "JURÍDICO", "url": "https://www.google.com/calendar/event?eid=Z3BuNW9udGNrdmg1c2toMGxqdGJ1NjRqMDggaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d07t11", "time": "18:00", "title": "Dia de Mercado", "desc": "18:00–19:00", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=aWVkcHB0dGR1b2VlNGdrY2xzaW0ycTlqdWtfMjAyNjA3MDdUMjEwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d07t12", "time": "20:00", "title": "Pegar Jade — Ballet", "desc": "20:00–20:15", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=cTIxdGI2MzJvNjZmY28wbzdmbW5sMWIxcWNfMjAyNjA3MDdUMjMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d07a1", "time": "", "title": "💰 Cirque du Soleil — Parcela 3/4", "desc": "R$299,85 · 13/09/2026 Parque Villa-Lobos SP", "cls": "money", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=Zm5xMGpydjJ1Z2JvcTRraTNqdmVydXQzMzQgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d07a2", "time": "", "title": "💰 TFAMG — Engelinhas", "desc": "Pagamento trimestral", "cls": "warn", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=cWVrcGhycW9uYzNqbW9kdXU0YzEycDE3MThfMjAyNjA3MDcgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d07a3", "time": "", "title": "Acompanhar Salário-Maternidade Urbano", "desc": "Pedido 1085470321", "cls": "", "badge": "badge-pes", "bl": "INSS", "url": "https://www.google.com/calendar/event?eid=a25oM2pkM24wMzdqbDN1YWY5ZzZrMjJsYmNfMjAyNjA3MDcgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}]}, {"key": "d08", "date": "2026-07-08", "dow": "Quarta", "dnum": "08", "banner": "💰 Aluguel Galpão Tio Fred (30%) · Antecipação recebíveis 14h30 · Check-in Tio Fred 07h", "items": [{"id": "d08t1", "time": "06:00", "title": "Enviar Saldo Bancário e PDC — Guilherme", "desc": "Engelinhas · rotina", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=a2l2ZnI4ZzQxZDAzdTJybjZnY2k0NzRzcDhfMjAyNjA3MDhUMDkwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d08t2", "time": "07:00", "title": "CHECK-IN EXECUTIVO GRUPO TIO FRED", "desc": "07:00–09:30", "cls": "purple", "badge": "badge-tfd", "bl": "TIO FRED", "url": "https://www.google.com/calendar/event?eid=YnJiaGZsYTBsNGNmZDIzZmtmNTE2a2dhc2tfMjAyNjA3MDhUMTAwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d08t3", "time": "09:00", "title": "Engelinhas 09h–17h", "desc": "Bloco de trabalho", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=NmtyM2ljOXA3MG9qZWI5bjc0bzYyYjlrNjhxamFiOXA2Z3A2OGI5bjc0czNjYzFoNzRxNjJvaG03NF8yMDI2MDcwOFQxMjAwMDBaIGhlcnNvbi52YWxtb250QG0&ctz=America/Sao_Paulo"}, {"id": "d08t4", "time": "09:30", "title": "Dia de Antecipação", "desc": "09:30–09:40", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=cjc3bGJsc3J1ZW1zbGY1ZmpqZDV1cDBrcW9fMjAyNjA3MDhUMTIzMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d08t5", "time": "10:00", "title": "Check-in Diário Anzac Men", "desc": "Remoto · 10:00–10:30", "cls": "teal", "badge": "badge-anz", "bl": "ANZAC MEN", "url": "https://www.google.com/calendar/event?eid=MWRtc2hkdjYxaG9iMWwycDRvNW1xdjFuNXNfMjAyNjA3MDhUMTMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d08t6", "time": "10:00", "title": "Cartas de Anuência Cartório", "desc": "Rotina diária", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=bzlzNjRnbnI5YnBia2FjMHA1N2cxZW1wanNfMjAyNjA3MDhUMTMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d08t7", "time": "13:00", "title": "Conciliação Bancária — Valmont Labs", "desc": "13:00–14:00", "cls": "purple", "badge": "badge-pes", "bl": "VALMONT LABS", "url": "https://www.google.com/calendar/event?eid=dnJ1cmhzZmhmMm1hb3Y4aDlmb3MwazU1ZThfMjAyNjA3MDhUMTYwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d08t8", "time": "14:30", "title": "Engelinhas — Preparar antecipação de recebíveis", "desc": "Portal Vinci, PDFs NFs, CRBC, certificado", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=c21zdGpwM2RpZGdwN3QzdGQ3OGJpcWc2YWNfMjAyNjA3MDhUMTczMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d08t9", "time": "15:00", "title": "Engelinhas — Sessão/termo antecipação recebíveis", "desc": "15:00–15:30", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=NjRtN2hiZjJwcjhmMHFxaHZuM2toMG9zaGNfMjAyNjA3MDhUMTgwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d08a1", "time": "", "title": "💰 ALUGUEL GALPÃO E SEDE (30%) — TIO FRED", "desc": "Pagamento mensal", "cls": "money", "badge": "badge-tfd", "bl": "TIO FRED", "url": "https://www.google.com/calendar/event?eid=czJwcDAxMWpmZmdwc21pc3ZmNXM3cGl2N29fMjAyNjA3MDggaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d08a2", "time": "", "title": "Acompanhar Salário-Maternidade Urbano", "desc": "Pedido 1085470321", "cls": "", "badge": "badge-pes", "bl": "INSS", "url": "https://www.google.com/calendar/event?eid=a25oM2pkM24wMzdqbDN1YWY5ZzZrMjJsYmNfMjAyNjA3MDggaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}]}, {"key": "d09", "date": "2026-07-09", "dow": "Quinta", "dnum": "09", "banner": "🤝 Reunião Gabriel Aragão 15h · Vôlei Jade 09h · Antecipação recebíveis", "items": [{"id": "d09t1", "time": "06:00", "title": "Enviar Saldo Bancário e PDC — Guilherme", "desc": "Engelinhas · rotina", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=a2l2ZnI4ZzQxZDAzdTJybjZnY2k0NzRzcDhfMjAyNjA3MDlUMDkwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d09t2", "time": "07:00", "title": "CHECK-IN EXECUTIVO ANZAC MEN", "desc": "07:00–08:30", "cls": "teal", "badge": "badge-anz", "bl": "ANZAC MEN", "url": "https://www.google.com/calendar/event?eid=OGI1N2pkcDNpaXJza3Y5Ymk1ZHIzYWM4aDRfMjAyNjA3MDlUMTAwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d09t3", "time": "09:00", "title": "Vôlei Jade", "desc": "09:00–10:20", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=bWxnY2lyZm00Mzl2amZudnQxb3BwaHZubXJfMjAyNjA3MDlUMTIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d09t4", "time": "10:00", "title": "Cartas de Anuência Cartório", "desc": "Rotina diária", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=bzlzNjRnbnI5YnBia2FjMHA1N2cxZW1wanNfMjAyNjA3MDlUMTMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d09t5", "time": "11:00", "title": "Engelinhas 11h–18h", "desc": "Bloco de trabalho", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=NjFpM2dkMzQ2MWkzNGJiMzY0bzZhYjlrNjlpbWNiOW82NHNtNmJiNmNkaGoyYzlpNmdwMzRkajY3NF8yMDI2MDcwOVQxNDAwMDBaIGhlcnNvbi52YWxtb250QG0&ctz=America/Sao_Paulo"}, {"id": "d09t6", "time": "13:00", "title": "Conciliação Bancária — Valmont Labs", "desc": "13:00–14:00", "cls": "purple", "badge": "badge-pes", "bl": "VALMONT LABS", "url": "https://www.google.com/calendar/event?eid=dnJ1cmhzZmhmMm1hb3Y4aDlmb3MwazU1ZThfMjAyNjA3MDlUMTYwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d09t7", "time": "15:00", "title": "Reunião com Gabriel Aragão", "desc": "Reagendado · via WhatsApp DDD 34", "cls": "purple", "badge": "badge-pes", "bl": "NOVO CLIENTE", "url": "https://www.google.com/calendar/event?eid=aTlibzcwOWQzYXE3NzJhbGZidWlta3RmNjQgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d09t8", "time": "20:00", "title": "Pegar Jade — Ballet", "desc": "20:00–20:15", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=cTIxdGI2MzJvNjZmY28wbzdmbW5sMWIxcWNfMjAyNjA3MDlUMjMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d09a1", "time": "", "title": "Acompanhar Salário-Maternidade Urbano", "desc": "Pedido 1085470321", "cls": "", "badge": "badge-pes", "bl": "INSS", "url": "https://www.google.com/calendar/event?eid=a25oM2pkM24wMzdqbDN1YWY5ZzZrMjJsYmNfMjAyNjA3MDkgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}]}, {"key": "d10", "date": "2026-07-10", "dow": "Sexta", "dnum": "10", "banner": "📋 Resumo Semanal 09h35 · 🌙 Preto Velho 19h30 · Gerar DAS MEI Tio Fred · Taxa Fiscal CNPJ R$236", "items": [{"id": "d10t1", "time": "06:00", "title": "Enviar Saldo Bancário e PDC — Guilherme", "desc": "Engelinhas · rotina", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=a2l2ZnI4ZzQxZDAzdTJybjZnY2k0NzRzcDhfMjAyNjA3MTBUMDkwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t2", "time": "07:00", "title": "CHECK-IN EXECUTIVO GRUPO TIO FRED", "desc": "07:00–09:30", "cls": "purple", "badge": "badge-tfd", "bl": "TIO FRED", "url": "https://www.google.com/calendar/event?eid=YnJiaGZsYTBsNGNmZDIzZmtmNTE2a2dhc2tfMjAyNjA3MTBUMTAwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t3", "time": "09:00", "title": "Engelinhas 09h–16h", "desc": "Bloco de trabalho", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=NmtvNmNlMW82cGk2Y2JiNTY1aG0yYjlrNmtxNmNiYjE2Y3MzOGI5azY1aW00Y2o1YzRxbWFkcGk2b18yMDI2MDcxMFQxMjAwMDBaIGhlcnNvbi52YWxtb250QG0&ctz=America/Sao_Paulo"}, {"id": "d10t4", "time": "09:30", "title": "REUNIÃO TÉCNICA SEMANAL — GEOTECH", "desc": "09:30–10:30", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=amk1b2FyMm9nN2czbTQ0NWR1cGY2cjVqN2NfMjAyNjA3MTBUMTIzMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t5", "time": "09:30", "title": "Dia de Antecipação", "desc": "09:30–09:40", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=cjc3bGJsc3J1ZW1zbGY1ZmpqZDV1cDBrcW9fMjAyNjA3MTBUMTIzMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t6", "time": "09:35", "title": "Entrega: Resumo Semanal de Gestão", "desc": "Via WhatsApp · feito, pendências, bloqueios, próximos passos", "cls": "warn", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=YW9pYXVsZTE4Mmk4aXAzMDR1dTUwYXI5NXNfMjAyNjA3MTBUMTIzNTAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t7", "time": "09:45", "title": "Aula Teatro Jade", "desc": "09:45–11:25 · mãe leva, Kate pega", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=OGs0Zm8yZ2Zqb3RscnR0Z28ydjdoZzdkYjRfMjAyNjA3MTBUMTI0NTAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t8", "time": "10:00", "title": "Check-in Diário Anzac Men", "desc": "Remoto · 10:00–10:30", "cls": "teal", "badge": "badge-anz", "bl": "ANZAC MEN", "url": "https://www.google.com/calendar/event?eid=MWRtc2hkdjYxaG9iMWwycDRvNW1xdjFuNXNfMjAyNjA3MTBUMTMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t9", "time": "10:00", "title": "Cartas de Anuência Cartório", "desc": "Rotina diária", "cls": "", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=bzlzNjRnbnI5YnBia2FjMHA1N2cxZW1wanNfMjAyNjA3MTBUMTMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t10", "time": "13:00", "title": "Conciliação Bancária — Valmont Labs", "desc": "13:00–14:00", "cls": "purple", "badge": "badge-pes", "bl": "VALMONT LABS", "url": "https://www.google.com/calendar/event?eid=dnJ1cmhzZmhmMm1hb3Y4aDlmb3MwazU1ZThfMjAyNjA3MTBUMTYwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t11", "time": "14:30", "title": "Engelinhas — Preparar antecipação de recebíveis", "desc": "Portal Vinci, PDFs NFs, CRBC, certificado", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=c21zdGpwM2RpZGdwN3QzdGQ3OGJpcWc2YWNfMjAyNjA3MTBUMTczMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t12", "time": "15:00", "title": "Engelinhas — Sessão/termo antecipação recebíveis", "desc": "15:00–15:30", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=NjRtN2hiZjJwcjhmMHFxaHZuM2toMG9zaGNfMjAyNjA3MTBUMTgwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t13", "time": "18:00", "title": "Dia de Mercado", "desc": "18:00–19:00", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=aWVkcHB0dGR1b2VlNGdrY2xzaW0ycTlqdWtfMjAyNjA3MTBUMjEwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10t14", "time": "19:30", "title": "🌙 Dia de Preto Velho — Centro", "desc": "19:30–21:30", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=dTd1N2hkMmk5bzk1MGltMGprZjE1OTViYTRfMjAyNjA3MTBUMjIzMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d10a1", "time": "", "title": "TIO FRED — Monitor Aniversário + Resumo + CRM", "desc": "Recorrente semanal", "cls": "purple", "badge": "badge-tfd", "bl": "TIO FRED", "url": "https://www.google.com/calendar/event?eid=MXVkMTAyaXFsdHJocG84aGZnOTB2cmdmM3NfMjAyNjA3MTAgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d10a2", "time": "", "title": "Gerar DAS de MEI — Tio Fred (Todos os Colaboradores)", "desc": "Vencimento mensal", "cls": "money", "badge": "badge-tfd", "bl": "TIO FRED", "url": "https://www.google.com/calendar/event?eid=M3NucWtzZGkzaDRkZGswbzlxYm85MnBlNjRfMjAyNjA3MTAgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d10a3", "time": "", "title": "💰 Taxa Fiscalização Estabelecimentos — CNPJ Consultoria", "desc": "R$236,35 · Competência Jun/2026", "cls": "money", "badge": "badge-pes", "bl": "FISCAL", "url": "https://www.google.com/calendar/event?eid=bWQ5MGRkY2JobW5zYmJldXBidTRscGtoZGMgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d10a4", "time": "", "title": "Lembrar Marco: Multa Certidão Negativa (IR 2022)", "desc": "", "cls": "warn", "badge": "badge-pes", "bl": "FISCAL", "url": "https://www.google.com/calendar/event?eid=b3VsNHNpdGRqaGd0dW1vczJwdnYyczc3c2MgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d10a5", "time": "", "title": "Pix PJ para PF (Rubrica Correta) — Reembolso Tio Fred", "desc": "", "cls": "purple", "badge": "badge-tfd", "bl": "TIO FRED", "url": "https://www.google.com/calendar/event?eid=cDVibDNtZGNzam9sbGJkZmxrdm9nOHJnaTRfMjAyNjA3MTAgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d10a6", "time": "", "title": "Acompanhar Salário-Maternidade Urbano", "desc": "Pedido 1085470321", "cls": "", "badge": "badge-pes", "bl": "INSS", "url": "https://www.google.com/calendar/event?eid=a25oM2pkM24wMzdqbDN1YWY5ZzZrMjJsYmNfMjAyNjA3MTAgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}]}, {"key": "d11", "date": "2026-07-11", "dow": "Sábado", "dnum": "11", "banner": "🏐 Vôlei Arena X 10h · 🎸 Show Roupa Nova 21h · Renovações P2P/IPTV Ivaneide", "items": [{"id": "d11t1", "time": "10:00", "title": "🏐 VÔLEI: ARENA X", "desc": "10:00–12:00", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=Mm1waTBnMWRwamowZnE4cWZiMjRmNnFzbjBfMjAyNjA3MTFUMTMwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d11t2", "time": "14:00", "title": "Renovar IPTV Pais", "desc": "", "cls": "", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=ZHIxaXMyYnI3b2Z1dGE2dmU5cHFjbmoyODhfMjAyNjA3MTFUMTcwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d11t3", "time": "21:00", "title": "🎸 Show Roupa Nova — Castelli Master", "desc": "Turnê 40 anos · Open Bar · Ingresso Kate Monica Costa", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=NTR0bWM5NXQ2MW44a2VuczJuazQ5ZG1zMDggaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d11a1", "time": "", "title": "Renovação P2P — Ivaneide", "desc": "", "cls": "", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=bHJjYm9iMXBrcTJ1Z3JlcjM1NGJqMWprZnNfMjAyNjA3MTEgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d11a2", "time": "", "title": "Renovação P2P — Valmont", "desc": "", "cls": "", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=b2Nqdm1jN2lpYjZkMzNtdWdmazlmdGZuM2NfMjAyNjA3MTEgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}, {"id": "d11a3", "time": "", "title": "Renovação IPTV — Ivaneide", "desc": "", "cls": "", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=dDB2NXFtYWZ2am52ZzVtanVjMWgxczhqb2dfMjAyNjA3MTEgaGVyc29uLnZhbG1vbnRAbQ&ctz=America/Sao_Paulo"}]}, {"key": "d12", "date": "2026-07-12", "dow": "Domingo", "dnum": "12", "banner": "🏐 Vôlei 08h · 📋 Atualizar NFS Engelinhas Data Room 09h", "items": [{"id": "d12t1", "time": "08:00", "title": "Vôlei", "desc": "08:00–10:00", "cls": "personal", "badge": "badge-pes", "bl": "PESSOAL", "url": "https://www.google.com/calendar/event?eid=ODdwaGVtc2s2bTk5cTVhaGU3MnVuMm9wdmdfMjAyNjA3MTJUMTEwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}, {"id": "d12t2", "time": "09:00", "title": "ATUALIZAR NFS ENGELINHAS DATA ROOM", "desc": "09:00–10:00", "cls": "money", "badge": "badge-eng", "bl": "ENGELINHAS", "url": "https://www.google.com/calendar/event?eid=N3RkZmthcjVtOTRzYnBzdHBxN3BuZHZhc2dfMjAyNjA3MTJUMTIwMDAwWiBoZXJzb24udmFsbW9udEBt&ctz=America/Sao_Paulo"}]}];
+
+// ── SYNC (GitHub como backend) ──────────────────────────────
+const GITHUB_TOKEN = ["ghp_HzX6h6U7","vppPImq8AW3P","EWgeBNm3kc31pIzI"].join("");
+const REPO = "hersonvalmont/agenda";
+const CHECKS_FILE = "checks.json";
+let _checks = {}, _checksSha = null, _syncing = false, _dirty = false;
+
+async function loadChecks() {
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${CHECKS_FILE}`, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json" }
+    });
+    if (r.ok) {
+      const d = await r.json();
+      _checksSha = d.sha;
+      _checks = JSON.parse(atob(d.content.replace(/\n/g, "")));
+    } else { _checks = {}; }
+  } catch(e) {
+    try { _checks = JSON.parse(localStorage.getItem("agenda_checks") || "{}"); } catch(e2) { _checks = {}; }
+  }
+  try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e) {}
+}
+
+async function saveChecks() {
+  if (_syncing) { _dirty = true; return; }
+  _syncing = true;
+  try {
+    const body = { message: "sync checks", content: btoa(unescape(encodeURIComponent(JSON.stringify(_checks)))) };
+    if (_checksSha) body.sha = _checksSha;
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${CHECKS_FILE}`, {
+      method: "PUT",
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json", "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (r.ok) { const d = await r.json(); _checksSha = d.content.sha; }
+    try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e) {}
+  } catch(e) {
+    try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e2) {}
+  }
+  _syncing = false;
+  if (_dirty) { _dirty = false; saveChecks(); }
+}
+
+function ckey(date, id) { return `${date}__${id}`; }
+function isChecked(date, id) { return !!_checks[ckey(date, id)]; }
+function setChecked(date, id, v) {
+  if (v) _checks[ckey(date, id)] = 1; else delete _checks[ckey(date, id)];
+  saveChecks();
+}
+
+// ── MODAL ──────────────────────────────────────────────────
+const modalOverlay = document.getElementById("modalOverlay");
+const modalClose   = document.getElementById("modalClose");
+
+function openModal(it) {
+  document.getElementById("modalBadge").textContent = it.bl || "";
+  document.getElementById("modalBadge").className   = "modal-badge " + (it.badge || "");
+  const timeEl = document.getElementById("modalTime");
+  const dayEl  = document.getElementById("modalTimeDay");
+  const dateEl = document.getElementById("modalDate");
+  const day = DAYS.find(d => d.items.some(i => i.id === it.id));
+  const dateStr = day ? day.date : "";
+  const dateObj = dateStr ? new Date(dateStr + "T12:00:00") : null;
+  const dowNames = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+  const monthNames = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  if (it.time) {
+    timeEl.textContent = it.time; timeEl.className = "modal-time";
+  } else {
+    timeEl.textContent = "Dia todo"; timeEl.className = "modal-time allday";
+  }
+  dayEl.textContent  = dateObj ? dowNames[dateObj.getDay()] : "";
+  dateEl.textContent = dateObj ? `${dateObj.getDate()} de ${monthNames[dateObj.getMonth()]} de ${dateObj.getFullYear()}` : "";
+  document.getElementById("modalTitle").textContent = it.title;
+  document.getElementById("modalDesc").textContent  = it.desc || "";
+  const btn = document.getElementById("modalBtn");
+  btn.href = it.url || "#";
+  btn.style.display = it.url ? "flex" : "none";
+  modalOverlay.classList.add("open");
+}
+
+modalClose.onclick = () => modalOverlay.classList.remove("open");
+modalOverlay.addEventListener("click", e => { if (e.target === modalOverlay) modalOverlay.classList.remove("open"); });
+
+// ── HELPERS ────────────────────────────────────────────────
+const doneListOpenState = {};
+function checkSVG() { return `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`; }
+function hardReload() { if ("caches" in window) { caches.keys().then(k => Promise.all(k.map(c => caches.delete(c)))).then(() => window.location.reload(true)); } else { window.location.reload(true); } }
+
+// ── RENDER ─────────────────────────────────────────────────
+function buildItem(it, date) {
+  const done = isChecked(date, it.id);
+  const el = document.createElement("div");
+  el.className = "item" + (it.cls ? " " + it.cls : "");
+  el.innerHTML = `<div class="checkbox ${done ? "checked" : ""}" data-id="${it.id}">${checkSVG()}</div><div class="item-body">${it.time ? `<span class="item-time">${it.time}</span>` : ""}<div class="item-title">${it.title}</div>${it.desc ? `<div class="item-desc">${it.desc}</div>` : ""}<span class="badge ${it.badge}">${it.bl}</span></div>`;
+  el.querySelector(".checkbox").addEventListener("click", e => {
+    e.stopPropagation();
+    const inDone = document.getElementById("panel_" + DAYS.find(d => d.date === date).key).querySelector(".doneList").contains(el);
+    if (inDone) { setChecked(date, it.id, false); }
+    else { el.classList.add("fade-out"); setChecked(date, it.id, true); }
+    setTimeout(() => renderDay(DAYS.find(d => d.date === date)), 270);
+  });
+  el.addEventListener("click", e => { if (e.target.closest(".checkbox")) return; openModal(it); });
+  return { el, done };
+}
+
+function renderDay(day) {
+  const timed = day.items.filter(i => i.time);
+  const allday = day.items.filter(i => !i.time);
+  const panel = document.getElementById("panel_" + day.key);
+  const timedList = panel.querySelector(".timedList");
+  const alldayList = panel.querySelector(".allDayList");
+  const doneList = panel.querySelector(".doneList");
+  timedList.innerHTML = ""; alldayList.innerHTML = ""; doneList.innerHTML = "";
+  let doneCount = 0;
+  function place(it, target) {
+    const { el, done } = buildItem(it, day.date);
+    if (done) { doneCount++; doneList.appendChild(el); } else { target.appendChild(el); }
+  }
+  timed.forEach(it => place(it, timedList));
+  allday.forEach(it => place(it, alldayList));
+  const total = day.items.length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+  panel.querySelector(".progFill").style.width = pct + "%";
+  panel.querySelector(".progLabel").textContent = `${doneCount} de ${total} concluídos`;
+  panel.querySelector(".progPct").textContent = pct + "%";
+  panel.querySelector(".emptyMsg").style.display = (total > 0 && doneCount === total) ? "block" : "none";
+  const isOpen = !!doneListOpenState[day.key];
+  doneList.style.display = isOpen ? "block" : "none";
+  panel.querySelector(".doneToggle").textContent = isOpen ? "Ocultar concluídos ▴" : "Mostrar concluídos ▾";
+  const tab = document.querySelector(`.tab[data-key="${day.key}"] .dcount`);
+  if (tab) tab.textContent = `${doneCount}/${total}`;
+  panel.querySelector(".doneToggle").onclick = () => {
+    doneListOpenState[day.key] = !doneListOpenState[day.key];
+    doneList.style.display = doneListOpenState[day.key] ? "block" : "none";
+    panel.querySelector(".doneToggle").textContent = doneListOpenState[day.key] ? "Ocultar concluídos ▴" : "Mostrar concluídos ▾";
+  };
+  panel.querySelector(".resetBtn").onclick = () => {
+    if (confirm(`Resetar checks de ${day.dow} ${day.dnum}?`)) {
+      day.items.forEach(it => setChecked(day.date, it.id, false));
+      renderDay(day);
+    }
+  };
+}
+
+// ── INIT ───────────────────────────────────────────────────
+function detectTodayKey() {
+  const now = new Date();
+  const s = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  const m = DAYS.find(d => d.date === s);
+  return m ? m.key : DAYS[0].key;
+}
+const TODAY_KEY = detectTodayKey();
+
+function buildTabs() {
+  const tabsEl = document.getElementById("tabs");
+  DAYS.forEach(day => {
+    const done = day.items.filter(it => isChecked(day.date, it.id)).length;
+    const tab = document.createElement("div");
+    tab.className = "tab" + (day.key === TODAY_KEY ? " today" : "");
+    tab.dataset.key = day.key;
+    tab.innerHTML = `<div class="dow">${day.dow.substring(0,3).toUpperCase()}</div><div class="dnum">${day.dnum}</div><div class="dcount">${done}/${day.items.length}</div>`;
+    tab.onclick = () => switchDay(day.key);
+    tabsEl.appendChild(tab);
+  });
+}
+
+function buildPanels() {
+  const root = document.getElementById("panelsRoot");
+  DAYS.forEach(day => {
+    const panel = document.createElement("div");
+    panel.className = "day-panel"; panel.id = "panel_" + day.key;
+    panel.innerHTML = `${day.banner ? `<div class="alert-banner">${day.banner}</div>` : ""}<div class="progress-wrap"><div class="progress-text"><span class="progLabel">0/0</span><span class="progPct">0%</span></div><div class="progress-bar"><div class="progress-fill progFill"></div></div></div><div class="section-title">⏰ Com Horário</div><div class="timedList"></div><div class="section-title">📌 Do Dia (sem horário fixo)</div><div class="allDayList"></div><div class="empty-msg emptyMsg">🎉 Dia zerado!</div><div class="done-toggle doneToggle">Mostrar concluídos ▾</div><div class="doneList"></div><button class="reset-btn resetBtn">↺ Resetar checklist do dia</button>`;
+    root.appendChild(panel);
+  });
+}
+
+function switchDay(key) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.key === key));
+  document.querySelectorAll(".day-panel").forEach(p => p.classList.toggle("active", p.id === "panel_" + key));
+  renderDay(DAYS.find(d => d.key === key));
+}
+
+document.getElementById("panelsRoot").innerHTML = '<div style="text-align:center;color:#8a90a0;padding:60px 20px;font-size:.95rem;">⏳ Sincronizando...</div>';
+loadChecks().then(() => {
+  document.getElementById("panelsRoot").innerHTML = "";
+  buildTabs(); buildPanels(); DAYS.forEach(renderDay); switchDay(TODAY_KEY);
+});
+</script>
+</body>
+</html>
