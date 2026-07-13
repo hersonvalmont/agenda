@@ -114,7 +114,8 @@ const DAYS=[{"key": "p29", "date": "2026-06-29", "dow": "Seg", "dnum": "29/06", 
 const GITHUB_TOKEN = ["ghp_HzX6h6U7","vppPImq8AW3P","EWgeBNm3kc31pIzI"].join("");
 const REPO = "hersonvalmont/agenda";
 const CHECKS_FILE = "checks.json";
-let _checks = {}, _checksSha = null, _syncing = false, _dirty = false;
+let _checks = {}, _checksSha = null;
+let _saveTimer = null; // debounce
 
 async function loadChecks() {
   try {
@@ -132,10 +133,14 @@ async function loadChecks() {
   try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e) {}
 }
 
-async function saveChecks() {
-  if (_syncing) { _dirty = true; return; }
-  _syncing = true;
+async function _doSave() {
   try {
+    // Buscar SHA atual antes de salvar para evitar conflito
+    const rGet = await fetch(`https://api.github.com/repos/${REPO}/contents/${CHECKS_FILE}`, {
+      headers: { Authorization: `token ${GITHUB_TOKEN}`, Accept: "application/vnd.github.v3+json" }
+    });
+    if (rGet.ok) { const dGet = await rGet.json(); _checksSha = dGet.sha; }
+
     const body = { message: "sync checks", content: btoa(unescape(encodeURIComponent(JSON.stringify(_checks)))) };
     if (_checksSha) body.sha = _checksSha;
     const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${CHECKS_FILE}`, {
@@ -148,8 +153,13 @@ async function saveChecks() {
   } catch(e) {
     try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e2) {}
   }
-  _syncing = false;
-  if (_dirty) { _dirty = false; saveChecks(); }
+}
+
+function saveChecks() {
+  // Debounce: aguarda 2s sem novos checks antes de salvar
+  try { localStorage.setItem("agenda_checks", JSON.stringify(_checks)); } catch(e) {}
+  if (_saveTimer) clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_doSave, 2000);
 }
 
 function ckey(date, id) { return `${date}__${id}`; }
